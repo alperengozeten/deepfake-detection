@@ -160,7 +160,7 @@ def create_data_loaders(crops_dir, metadata_df, image_size, batch_size, num_work
     return train_loader, val_loader, test_loader
 
 train_loader, val_loader, test_loader = create_data_loaders(crops_dir, metadata, image_size, 
-                                               batch_size, num_workers=2)
+                                               batch_size, num_workers=0)
 
 dataloaders = {
     "train": train_loader,
@@ -274,7 +274,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs = 20):
 model_ft = train_model(model, criterion, optimizer, exp_lr_scheduler) # now it is a lot faster
 # I will come back after 10 epochs
 
-classes=['training_fake', 'training_real']
+classes=['training_real', 'training_fake']
 
 test_loss = 0.0
 class_correct = list(0 for i in range(2))
