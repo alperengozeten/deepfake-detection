@@ -1,8 +1,8 @@
+
 #!/usr/bin/env python
 # coding: utf-8
 
 # In[8]:
-
 
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
@@ -26,7 +26,7 @@ from torchvision import models
 import warnings
 warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
-get_ipython().run_line_magic('matplotlib', 'inline')
+#get_ipython().run_line_magic('matplotlib', 'inline')
 import sys
 from tqdm import tqdm
 import time
@@ -53,7 +53,7 @@ def get_data_loaders(data_dir, batch_size, train = False):
             T.RandomErasing(p=0.2, value='random')
         ])
         train_data = datasets.ImageFolder(os.path.join(data_dir, "train/"), transform = transform)
-        train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4)
+        train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=0)
         return train_loader, len(train_data)
     else:
         # val/test
@@ -65,15 +65,15 @@ def get_data_loaders(data_dir, batch_size, train = False):
         ])
         val_data = datasets.ImageFolder(os.path.join(data_dir, "val/"), transform=transform)
         test_data = datasets.ImageFolder(os.path.join(data_dir, "test/"), transform=transform)
-        val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True, num_workers=4)
-        test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=4)
+        val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True, num_workers=0)
+        test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=0)
         return val_loader, test_loader, len(val_data), len(test_data)
 
 
 # In[11]:
 
 
-get_ipython().system(' pip install split-folders')
+#get_ipython().system(' pip install split-folders')
 
 import splitfolders
 
@@ -81,21 +81,21 @@ import splitfolders
 # In[19]:
 
 
-input_folder = r'C:\Users\Oguz\Desktop\464\real_and_fake_face'
+input_folder = r'C:\\Users\\PC\\Desktop\\CS464\\real_and_fake_face'
 
 
 # In[21]:
 
 
-splitfolders.ratio(input_folder, output=r"C:\Users\Oguz\Desktop\464\real_and_fake_face_split", 
-                   seed=42, ratio=(.8, .1,.1), 
-                   group_prefix=None) # default values
+# splitfolders.ratio(input_folder, output=r"C:\\Users\\PC\\Desktop\\CS464\\real_and_fake_face_split", 
+#                    seed=42, ratio=(.8, .1,.1), 
+#                    group_prefix=None) # default values
 
 
 # In[23]:
 
 
-dataset_path = r"C:\Users\Oguz\Desktop\464\real_and_fake_face_split"
+dataset_path = r"C:\\Users\\PC\\Desktop\\CS464\\real_and_fake_face_split"
 
 
 # In[24]:
@@ -108,7 +108,7 @@ dataset_path = r"C:\Users\Oguz\Desktop\464\real_and_fake_face_split"
 # In[27]:
 
 
-classes = get_classes(r"C:\Users\Oguz\Desktop\464\real_and_fake_face_split/train/")
+classes = get_classes(r"C:\\Users\\PC\\Desktop\\CS464\\real_and_fake_face_split\\train/")
 print(classes, len(classes))
 
 
@@ -126,9 +126,8 @@ dataset_sizes = {
 
 
 # In[29]:
-
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# if torch.cuda.is_available() else 'cpu'
+device = torch.device('cuda')
 device
 
 
@@ -219,6 +218,7 @@ class CNN(nn.Module):
         return x
 
 model = CNN()
+model.to('cuda')
 print(model) # Summary of the architecture
 
 
@@ -249,6 +249,8 @@ model.train()
 
 count=1
 for batch_idx, (data, target) in enumerate(train_loader):
+    data = data.to('cuda')
+    target = target.to('cuda')
     if count==1:
         i1,z1=batch_idx, (data, target)
         count+=1
@@ -265,7 +267,6 @@ for batch_idx, (data, target) in enumerate(train_loader):
 
 
 # In[52]:
-
 
 optimizer.zero_grad()
 
@@ -304,7 +305,7 @@ def loss_criteria(y_hat, y):
 # In[83]:
 
 
-loss = loss_criteria(output.resize(32), target)
+loss = loss_criteria(output.resize(32).float(), target.float())
 
 
 # In[87]:
@@ -404,7 +405,7 @@ training_loss = []
 validation_loss = []
 
 # Train over 10 epochs (We restrict to 10 for time issues)
-epochs = 10
+epochs = 1
 print('Training on', device)
 for epoch in range(1, epochs + 1):
         train_loss = train(model, device, train_loader, optimizer, epoch)
@@ -420,7 +421,7 @@ for epoch in range(1, epochs + 1):
 import seaborn as sns
 
 # Required magic to display matplotlib plots in notebooks
-get_ipython().run_line_magic('matplotlib', 'inline')
+#get_ipython().run_line_magic('matplotlib', 'inline')
 
 from sklearn import metrics
 from sklearn.metrics import accuracy_score, confusion_matrix
@@ -432,9 +433,11 @@ model.eval()
 from sklearn.metrics import accuracy_score, confusion_matrix
 print("Getting predictions from test set...")
 for data, target in test_loader:
-    for label in target.data.numpy():
+    data = data.to('cuda')
+    target = target.to('cuda')
+    for label in target.cpu().data.numpy():
         truelabels.append(label)
-    for prediction in model(data).data.numpy().argmax(1):
+    for prediction in model(data).cpu().data.numpy().argmax(1):
         predictions.append(prediction) 
 
 # Plot the confusion matrix
@@ -450,7 +453,5 @@ plt.show()
 
 
 # In[ ]:
-
-
 
 
