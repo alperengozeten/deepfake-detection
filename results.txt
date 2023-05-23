@@ -1,1 +1,4 @@
-oversampling, lr=0.0001, ss=5, epoch=10, Test Accuracy of 81% (3837/4705), 
+oversampling,old, lr=0.0001, ss=1, epoch=10, Test Accuracy of 77% (3664/4705)
+oversampling,old, lr=0.0001, ss=5, epoch=10, Test Accuracy of 77% (3639/4705)
+oversampling,new, lr=0.0001, ss=5, epoch=10, Test Accuracy of 85% (4029/4705)
+augment, new, lr=0.0001, ss=5, epoch=10, Test Accuracy of 86% (4054/4705)
